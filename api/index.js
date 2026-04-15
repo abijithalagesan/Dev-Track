@@ -19,11 +19,8 @@ app.use(express.json());
 app.use(cors());
 
 // Serve static frontend files
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, 'client/dist')));
-} else {
-    app.use(express.static(path.join(__dirname, 'public')));
-}
+// Serve static frontend files
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Mount routers
 app.use('/api/auth', require('../routes/authRoutes'));
@@ -33,11 +30,6 @@ app.use('/api/admin', require('../routes/adminRoutes'));
 app.use('/api/users', require('../routes/userRoutes'));
 
 // Serve React App for any other routes (Production only)
-if (process.env.NODE_ENV === 'production') {
-    app.get('*', (req, res) => {
-        res.sendFile(path.resolve(__dirname, 'client', 'dist', 'index.html'));
-    });
-}
 
 const PORT = process.env.PORT || 5000;
 
