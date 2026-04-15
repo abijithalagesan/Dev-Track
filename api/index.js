@@ -62,6 +62,8 @@ connectDB().then(async (isMemoryDB) => {
             console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
         });
     }
+}).catch(err => {
+    console.error('Database connection process failed to initialize:', err);
 });
 
 module.exports = app;

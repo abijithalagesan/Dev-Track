@@ -12,7 +12,7 @@ const connectDB = async () => {
         } catch (initialErr) {
             if (process.env.VERCEL) {
                 console.error('MongoDB URI not provided or unreachable on Vercel. In-memory fallback is disabled in serverless environments.');
-                throw initialErr;
+                return false;
             }
 
             console.log(`Local MongoDB not found. Falling back to In-Memory MongoDB...`);
@@ -25,11 +25,10 @@ const connectDB = async () => {
             return true;
         }
     } catch (error) {
-        console.error(`Error: ${error.message}`);
+        console.error(`Error in connectDB: ${error.message}`);
         if (!process.env.VERCEL) {
             process.exit(1);
         }
-        throw error;
     }
 };
 
