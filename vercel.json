@@ -17,8 +17,12 @@
       "destination": "/server.js"
     },
     {
-      "source": "/(.*)",
-      "destination": "/client/index.html"
+      "source": "/assets/(.*)",
+      "destination": "/client/dist/assets/$1"
+    },
+    {
+      "source": "/((?!api|assets|favicon.svg).*)",
+      "destination": "/client/dist/index.html"
     }
   ]
 }
