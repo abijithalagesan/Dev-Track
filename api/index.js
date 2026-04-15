@@ -42,10 +42,11 @@ app.use('/api/users', require('../routes/userRoutes'));
 
 const PORT = process.env.PORT || 5000;
 
-// Connect to database and seed if in-memory
-connectDB().then(async (isMemoryDB) => {
-    if (isMemoryDB) {
-        console.log('Seeding in-memory database with test data...');
+// Connect to database and seed if empty
+connectDB().then(async () => {
+    const userCount = await User.countDocuments();
+    if (userCount === 0) {
+        console.log('Seeding initial admin and test data...');
         await User.create({ name: 'Super Admin', email: 'admin@devtrack.com', password: 'password123', role: 'admin' });
         await User.create({ name: 'Student User', email: 'student@devtrack.com', password: 'password123', role: 'user' });
         await Task.insertMany([
@@ -54,7 +55,7 @@ connectDB().then(async (isMemoryDB) => {
             { title: 'Update Portfolio Repo', type: 'daily', description: 'Commit at least one update to your Github portfolio.' },
             { title: 'Build Weather App MVP', type: 'project', description: 'Initialize responsive weather app using public API.' }
         ]);
-        console.log('Test data seeded.');
+        console.log('Seeding completed.');
     }
 
     if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
