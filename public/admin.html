@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevTrack | Admin</title>
+    <link rel="stylesheet" href="/css/tailwind.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-darkBg text-white antialiased h-screen flex overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-cardBg border-r border-gray-700 flex flex-col justify-between hidden md:flex">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-accent mb-8">
+                DevTrack Admin</h1>
+            <nav class="space-y-2">
+                <a href="/index.html"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-cardHover hover:text-white transition-colors">
+                    <i class="fas fa-arrow-left"></i> <span>Back to App</span>
+                </a>
+                <a href="#" onclick="switchTab('verification')" id="nav-verification"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-red-500/20 text-red-500 font-medium transition-colors">
+                    <i class="fas fa-chart-pie"></i> <span>Verification Panel</span>
+                </a>
+                <a href="#" onclick="switchTab('attendance')" id="nav-attendance"
+                    class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-cardHover hover:text-white transition-colors">
+                    <i class="fas fa-calendar-check"></i> <span>Attendance</span>
+                </a>
+            </nav>
+        </div>
+        <div class="p-6 border-t border-gray-700">
+            <button onclick="logout()"
+                class="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-lg transition-colors">
+                <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto">
+        <header
+            class="p-6 flex justify-between items-center border-b border-gray-800 bg-darkBg/95 backdrop-blur sticky top-0 z-10 transition-all">
+            <div>
+                <h2 class="text-2xl font-bold">Admin Dashboard</h2>
+                <p class="text-sm text-gray-400">Manage tasks and verify submissions.</p>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="openStudentModal()"
+                    class="px-4 py-2.5 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white font-medium rounded-lg flex items-center transition-all">
+                    <i class="fas fa-user-plus mr-2 text-emerald-400"></i> Add Student
+                </button>
+                <button onclick="openTaskModal()"
+                    class="px-5 py-2.5 bg-gradient-to-r from-red-500 to-accent hover:from-red-600 hover:to-yellow-600 text-white font-medium rounded-lg shadow-lg flex items-center transition-all shadow-red-500/20">
+                    <i class="fas fa-plus mr-2"></i> Create Task
+                </button>
+            </div>
+        </header>
+
+        <div class="p-6 max-w-7xl mx-auto pb-20 relative">
+
+            <!-- VERIFICATION PANEL -->
+            <div id="panel-verification" class="space-y-8">
+                <!-- Analytics -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Total Users -->
+                    <div
+                        class="bg-cardBg rounded-xl p-6 border border-gray-700 shadow-sm relative overflow-hidden group hover:border-gray-500 transition-colors">
+                        <div
+                            class="absolute top-0 right-0 p-4 opacity-5 text-6xl group-hover:scale-110 transition-transform">
+                            <i class="fas fa-users"></i></div>
+                        <p class="text-sm font-medium text-gray-400 mb-2">Total Users</p>
+                        <h3 class="text-4xl font-bold text-white" id="stat-users">0</h3>
+                    </div>
+
+                    <!-- Approved Tasks -->
+                    <div
+                        class="bg-cardBg rounded-xl p-6 border border-gray-700 shadow-sm relative overflow-hidden group hover:border-gray-500 transition-colors">
+                        <div
+                            class="absolute top-0 right-0 p-4 opacity-5 text-6xl text-secondary group-hover:scale-110 transition-transform">
+                            <i class="fas fa-check-double"></i></div>
+                        <p class="text-sm font-medium text-gray-400 mb-2">Tasks Completed</p>
+                        <h3 class="text-4xl font-bold text-secondary" id="stat-completed">0</h3>
+                    </div>
+
+                    <!-- Pending Approvals -->
+                    <div
+                        class="bg-cardBg rounded-xl p-6 border border-gray-700 shadow-sm relative overflow-hidden group hover:border-gray-500 transition-colors">
+                        <div
+                            class="absolute top-0 right-0 p-4 opacity-5 text-6xl text-accent group-hover:scale-110 transition-transform">
+                            <i class="fas fa-clock"></i></div>
+                        <p class="text-sm font-medium text-gray-400 mb-2">Pending Approvals</p>
+                        <h3 class="text-4xl font-bold text-accent" id="stat-pending">0</h3>
+                    </div>
+                </div>
+
+                <!-- Submissions Section -->
+                <div class="bg-cardBg border border-gray-700 rounded-xl shadow-md overflow-hidden">
+                    <div
+                        class="p-6 border-b border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-800/20">
+                        <h3 class="text-xl font-bold">Recent Submissions</h3>
+                        <div class="relative">
+                            <i class="fas fa-filter absolute left-3 top-3 text-gray-500 text-sm"></i>
+                            <select id="status-filter"
+                                class="pl-9 pr-8 py-2 bg-darkBg border border-gray-600 rounded-lg text-white outline-none focus:ring-2 focus:ring-red-500 text-sm font-medium appearance-none">
+                                <option value="pending">Pending Review</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="">All Submissions</option>
+                            </select>
+                            <i
+                                class="fas fa-chevron-down absolute right-3 top-3.5 text-gray-500 text-xs pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-800/80 text-gray-400 text-xs uppercase tracking-wider">
+                                    <th class="p-4 font-semibold">User</th>
+                                    <th class="p-4 font-semibold">Task</th>
+                                    <th class="p-4 font-semibold">Type</th>
+                                    <th class="p-4 font-semibold">Proof</th>
+                                    <th class="p-4 font-semibold">Status</th>
+                                    <th class="p-4 font-semibold text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="submissions-list" class="divide-y divide-gray-700/50 text-sm">
+                                <!-- Rows -->
+                                <tr>
+                                    <td colspan="6" class="p-8 text-center text-gray-500"><i
+                                            class="fas fa-spinner fa-spin mr-2"></i> Loading submissions...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div> <!-- End Verification Panel -->
+
+            <!-- ATTENDANCE PANEL -->
+            <div id="panel-attendance" class="hidden space-y-8 animate-fade-in relative">
+                <div
+                    class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-cardBg border border-gray-700/60 p-6 rounded-xl shadow-sm">
+                    <div>
+                        <h3 class="text-xl font-bold">Daily Attendance</h3>
+                        <p class="text-sm text-gray-400 mt-1">Track student presence and tardiness.</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <label class="text-sm font-medium text-gray-300">Select Date:</label>
+                        <input type="date" id="attendance-date"
+                            class="bg-darkBg border border-gray-600 rounded-lg px-4 py-2 text-white outline-none focus:ring-2 focus:ring-red-500 text-sm font-medium">
+                    </div>
+                </div>
+
+                <div class="bg-cardBg border border-gray-700 rounded-xl shadow-md overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-800/80 text-gray-400 text-xs uppercase tracking-wider">
+                                    <th class="p-4 font-semibold">Student Name</th>
+                                    <th class="p-4 font-semibold">Email</th>
+                                    <th class="p-4 font-semibold text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendance-list" class="divide-y divide-gray-700/50 text-sm">
+                                <tr>
+                                    <td colspan="3" class="p-8 text-center text-gray-500">Loading students...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-4 bg-gray-800/30 border-t border-gray-700 flex justify-end">
+                        <button onclick="saveAttendance()" id="save-attendance-btn"
+                            class="px-6 py-2.5 bg-secondary hover:bg-green-600 text-white font-medium rounded-lg shadow-lg flex items-center transition-all shadow-secondary/20">
+                            <i class="fas fa-save mr-2"></i> Save Attendance
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Create Task Modal -->
+    <div id="task-modal"
+        class="fixed inset-0 bg-darkBg/90 backdrop-blur-sm hidden items-center justify-center z-50 px-4">
+        <div class="bg-cardBg w-full max-w-lg rounded-2xl border border-gray-700 shadow-2xl p-6 transform scale-95 opacity-0 transition-all duration-300"
+            id="task-modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-white">Create New Task</h3>
+                <button onclick="closeTaskModal()" class="text-gray-400 hover:text-white transition-colors"><i
+                        class="fas fa-times text-xl"></i></button>
+            </div>
+
+            <form id="create-task-form" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Task Title <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" id="task-title" required
+                        class="w-full bg-darkBg border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:border-transparent focus:ring-red-500 outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Type <span
+                                class="text-red-500">*</span></label>
+                        <select id="task-type"
+                            class="w-full bg-darkBg border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:border-transparent focus:ring-red-500 outline-none">
+                            <option value="daily">Daily</option>
+                            <option value="leetcode">LeetCode</option>
+                            <option value="course">Course</option>
+                            <option value="project">Project</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Day / Ordering (opt)</label>
+                        <input type="number" id="task-day"
+                            class="w-full bg-darkBg border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:border-transparent focus:ring-red-500 outline-none"
+                            min="1" placeholder="e.g. 1">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Assign To</label>
+                    <div class="w-full bg-darkBg border border-gray-600 rounded-lg px-3 py-3 max-h-32 overflow-y-auto space-y-2" id="assign-checkbox-list">
+                        <label class="flex items-center space-x-2 text-sm text-gray-400">
+                            <i class="fas fa-spinner fa-spin"></i> <span>Loading students...</span>
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Leave all unchecked to assign globally (whole class).</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Description <span
+                            class="text-red-500">*</span></label>
+                    <textarea id="task-desc" required rows="4"
+                        class="w-full bg-darkBg border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:border-transparent focus:ring-red-500 outline-none"></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-700 mt-6">
+                    <button type="button" onclick="closeTaskModal()"
+                        class="px-5 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-700 transition-colors">Cancel</button>
+                    <button type="submit" id="task-submit-btn"
+                        class="px-5 py-2.5 rounded-lg text-sm font-medium bg-red-500 hover:bg-red-600 text-white transition-colors shadow-lg shadow-red-500/20">
+                        Create Task
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div id="student-modal"
+        class="fixed inset-0 bg-darkBg/90 backdrop-blur-sm hidden items-center justify-center z-50 px-4">
+        <div class="bg-cardBg w-full max-w-sm rounded-2xl border border-gray-700 shadow-2xl p-6 transform scale-95 opacity-0 transition-all duration-300"
+            id="student-modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-white">Add New Student</h3>
+                <button onclick="closeStudentModal()" class="text-gray-400 hover:text-white transition-colors"><i
+                        class="fas fa-times text-xl"></i></button>
+            </div>
+
+            <form id="create-student-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Full Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="student-name" required
+                        class="w-full bg-darkBg border border-gray-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:border-transparent focus:ring-emerald-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Email <span class="text-red-500">*</span></label>
+                    <input type="email" id="student-email" required
+                        class="w-full bg-darkBg border border-gray-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:border-transparent focus:ring-emerald-500 outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Password <span class="text-red-500">*</span></label>
+                    <input type="password" id="student-password" required
+                        class="w-full bg-darkBg border border-gray-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:border-transparent focus:ring-emerald-500 outline-none" placeholder="Provide an initial password">
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-700 mt-6">
+                    <button type="button" onclick="closeStudentModal()"
+                        class="px-4 py-2 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-700 transition-colors">Cancel</button>
+                    <button type="submit" id="student-submit-btn"
+                        class="px-4 py-2 rounded-lg text-sm font-medium bg-emerald-600 hover:bg-emerald-500 text-white transition-colors shadow-lg shadow-emerald-600/20">
+                        Create Account
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Verification Modal -->
+    <div id="verify-modal"
+        class="fixed inset-0 bg-darkBg/90 backdrop-blur-sm hidden items-center justify-center z-50 px-4">
+        <div class="bg-cardBg w-full max-w-md rounded-2xl border border-gray-700 shadow-2xl p-6 transform scale-95 opacity-0 transition-all duration-300"
+            id="verify-modal-content">
+            <h3 class="text-xl font-bold text-white mb-4">Verify Submission</h3>
+
+            <form id="verify-form" class="space-y-4">
+                <input type="hidden" id="verify-sub-id">
+                <input type="hidden" id="verify-status">
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2" id="verify-action-label">Feedback
+                        (Optional)</label>
+                    <textarea id="verify-feedback" rows="3"
+                        class="w-full bg-darkBg border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:border-transparent transition-all placeholder-gray-500"
+                        placeholder="Provide feedback to the student..."></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-700 mt-6">
+                    <button type="button" onclick="closeVerifyModal()"
+                        class="px-5 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-700 transition-colors">Cancel</button>
+                    <button type="submit" id="verify-submit-btn"
+                        class="px-5 py-2.5 rounded-lg text-sm font-medium text-white shadow-lg transition-colors flex items-center">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script src="/js/admin.js"></script>
+</body>
+
+</html>
