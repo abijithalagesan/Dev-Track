@@ -21,8 +21,14 @@ app.use(cors());
 
 // DB readiness check for serverless
 app.use((req, res, next) => {
-    if (mongoose.connection.readyState !== 1 && req.path.startsWith('/api')) {
-        return res.status(503).json({ success: false, message: 'Database connecting or unavailable. Please try again in a moment.' });
+    // 0: disconnected, 1: connected, 2: connecting, 3: disconnecting
+    const state = mongoose.connection.readyState;
+    if (state !== 1 && state !== 2 && req.path.startsWith('/api')) {
+        return res.status(503).json({ 
+            success: false, 
+            message: 'Database is starting up or unavailable. Please try again in a few seconds.',
+            readyState: state
+        });
     }
     next();
 });

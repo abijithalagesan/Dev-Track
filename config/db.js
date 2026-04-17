@@ -6,10 +6,13 @@ const connectDB = async () => {
         let uri = process.env.MONGODB_URI;
 
         try {
-            const conn = await mongoose.connect(uri, { serverSelectionTimeoutMS: 2000 });
+            const conn = await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
             console.log(`MongoDB Connected: ${conn.connection.host}`);
             return false;
         } catch (initialErr) {
+            if (!uri) {
+                console.error('MONGODB_URI is not defined in environment variables.');
+            }
             if (process.env.VERCEL) {
                 console.error('MongoDB URI not provided or unreachable on Vercel. In-memory fallback is disabled in serverless environments.');
                 return false;
